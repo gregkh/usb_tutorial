@@ -1,0 +1,31 @@
+This is the source code for the tutorial:
+	"How to write a real, working Linux driver"
+
+by Greg Kroah-Hartman <greg@kroah.com>
+
+All source code released under the GPL version 2 only.
+
+Last modified August 12, 2008
+
+Tested against the 2.6.27-rc2 kernel, if you are using any other kernel
+version, you are on your own.
+
+File information:
+ get_temp
+	script to read the temperature of the gotemp device plugged into
+	the system.
+
+ documentation/
+	Documentation files for how to get involved in kernel development
+	and USB kernel development.
+
+ git-tree/
+	git tree containing all of the source code for the tutorial.
+	One branch per step.
+
+ step-N/
+	source code for step N of the tutorial.
+
+ final/
+	final version of the driver.
+

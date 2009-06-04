@@ -1,0 +1,4 @@
+A simple "Hello World" kernel module.
+
+Introduce the main module entry and exit points, and how to build and use the
+module.

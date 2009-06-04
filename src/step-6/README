@@ -1,0 +1,12 @@
+USB urb stuff.
+
+Find the endpoint information.
+
+Create the urb.
+
+Submit the urb to the device.
+
+Read the data from the urb callback.
+
+Cleanup the urb when we are disconnected.
+

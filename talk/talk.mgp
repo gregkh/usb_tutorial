@@ -1,0 +1,563 @@
+%% use our own settings
+#%deffont "standard"   tfont "standard.ttf",   tmfont "kochi-mincho.ttf"
+#%deffont "thick"      tfont "thick.ttf",      tmfont "goth.ttf"
+#%deffont "typewriter" tfont "typewriter.ttf", tmfont "goth.ttf"
+#%deffont "typewriter"	xfont "monospace:bold"
+%deffont "typewriter"	xfont "bitstream vera sans mono:bold"
+#%deffont "typewriter"	xfont "bitstream vera sans mono:style=Bold"
+#%deffont "typewriter"	xfont "bitstream vera sans mono"
+%deffont "email"	xfont "bitstream vera sans mono"
+#%deffont "typewriter"	xfont "bitstream sans mono"
+#%deffont "standard"	xfont "bitstream charter:style=Bold"
+%deffont "standard"	xfont "baramond:style=Bold"
+#%deffont "standard"	xfont "P22 Typewriter"
+#%deffont "standard"	xfont "bitstream vera sans"
+#%deffont "standard"	xfont "monospace"
+%deffont "title"	xfont "P22 Typewriter"
+%deffont "knife"	xfont "Knifefight"
+#%deffont "thick"	xfont "bitstream vera sans:bold"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Default settings per each line numbers.
+%%
+%default 1 leftfill, size 1, fore "black", back "white"
+%default 2 size 7.8, vgap 10, prefix " ", fore "black", font "title"
+#%default 3 size 2, bar "gray70", vgap 10, fore "black"
+%default 3 size 2, bar "steel blue", vgap 10, fore "black"
+#%default 4 size 4, fore "white", vgap 10, prefix " ", font "standard", fore "black"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Default settings that are applied to TAB-indented lines.
+%%
+#%tab 1 size 5, vgap 40, prefix "  ", icon box "green" 50
+%tab 1 size 6.5, font "standard", vgap 20, prefix "   ", icon arc "steel blue" 40
+%tab 2 size 5.0, font "standard", vgap 20, prefix "           ", icon arc "sea green" 50
+%tab 3 size 3.5, font "standard", vgap 20, prefix "                     ", icon arc "violet red" 40
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+%nodefault
+%fore "black", back "white", center
+%size 20, font "knife"
+Write a real
+Linux driver
+%font "standard"
+%size 6
+
+Greg Kroah-Hartman
+%size 5
+SuSE Labs / Novell
+%size 4
+%font "email"
+gregkh@suse.de
+greg@kroah.com
+%font "standard"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Agenda
+
+
+	Intro to kernel modules
+
+	sysfs basics
+
+	USB basics
+
+	Driver to device binding
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Agenda - continued
+
+
+	Using sysfs
+
+	Sending and receiving USB data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Hello world kernel module
+
+%font "typewriter", size 3.3
+ #include <linux/kernel.h>
+ #include <linux/init.h>
+ #include <linux/module.h>
+
+ static int __init gotemp_init(void)
+ {
+         printk(KERN_INFO "Hello from the kernel!\\n");
+         return 0;
+ }
+
+ static void __exit gotemp_exit(void)
+ {
+ }
+
+ module_init(gotemp_init);
+ module_exit(gotemp_exit);
+
+ MODULE_AUTHOR("My name here");
+ MODULE_DESCRIPTION("Simple driver");
+ MODULE_LICENSE("GPL");
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Makefile
+
+
+
+%font "typewriter", size 4
+obj-m := hello.o
+
+KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+PWD       := $(shell pwd)
+
+all:
+        $(MAKE) -C $(KERNELDIR) M=$(PWD)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Manipulating Modules
+
+	See the module informaion
+%font "typewriter", size 5
+        modinfo hello.ko
+%font "standard"
+
+	Insert the module into the kernel
+%font "typewriter", size 5
+        insmod hello.ko
+%font "standard"
+
+	See that it did something
+%font "typewriter", size 5
+        lsmod
+        dmesg
+%font "standard"
+
+	Remove the module from the kernel
+%font "typewriter", size 5
+        rmmod hello
+%font "standard"
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+sysfs crash course
+
+
+%font "standard", size 8.5, center
+"Web woven by a spider on drugs"
+%font "standard", size 7
+%right
+- lwn.net       
+
+
+        
+%cont, font "typewriter", size 5, leftfill
+/proc
+%cont, font "standard", size 6
+ is for processes, not for drivers
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+USB crash course
+
+
+	devices and configs and interfaces oh my
+
+	How do you identify a unique device?
+       
+%cont, font "typewriter", size 5
+MODULE_DEVICE_TABLE
+%font "standard"
+		"it just works"
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Bind to the device - step 1
+
+
+
+%font "typewriter", size 4
+\#define VENDOR_ID   0x08f7
+\#define PRODUCT_ID  0x0002
+
+/* table of devices that work with this driver */
+static struct usb_device_id id_table [] = {
+        { USB_DEVICE(VENDOR_ID, PRODUCT_ID) },
+        { },
+};
+MODULE_DEVICE_TABLE(usb, id_table);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Bind to the device - step 2
+
+
+%font "typewriter", size 3.5
+static int gotemp_probe(struct usb_interface *interface, 
+                        const struct usb_device_id *id)
+{
+        dev_info(&interface->dev,
+                 "USB GoTemp device now attached\\n");
+        return 0;
+}
+
+static void gotemp_disconnect(struct usb_interface *interface)
+{
+        dev_info(&interface->dev,
+                 "USB GoTemp now disconnected\\n");
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Bind to the device - step 3
+
+
+%font "typewriter", size 4
+static struct usb_driver gotemp_driver = {
+        .name =       "gotemp",
+        .probe =      gotemp_probe,
+        .disconnect = gotemp_disconnect,
+        .id_table =   id_table,
+};
+
+static int __init gotemp_init(void)
+{
+        return usb_register(&gotemp_driver);
+}
+
+static void __exit gotemp_exit(void)
+{
+        usb_deregister(&gotemp_driver);
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Device specific structure
+
+
+
+%font "typewriter", size 5
+struct gotemp {
+        struct usb_device *udev;
+        int temp;
+};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Device specific structure
+
+%font "typewriter", size 3
+static int gotemp_probe(struct usb_interface *interface,
+                        const struct usb_device_id *id)
+{
+        struct usb_device *udev = interface_to_usbdev(interface);
+        struct gotemp *gdev;
+
+        gdev = kmalloc(sizeof(struct gotemp), GFP_KERNEL);
+        if (gdev == NULL) {
+                dev_err(&interface->dev, "Out of memory\\n");
+                return -ENOMEM;
+        }
+        memset(gdev, 0x00, sizeof(*gdev));
+
+        gdev->udev = usb_get_dev(udev);
+
+        usb_set_intfdata(interface, gdev);
+
+        dev_info(&interface->dev, "USB GoTemp device now attached\\n");
+        return 0;
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Device specific structure
+
+%font "typewriter", size 3
+static void gotemp_disconnect(struct usb_interface *interface)
+{
+        struct gotemp *gdev;
+
+        gdev = usb_get_intfdata(interface);
+        usb_set_intfdata(interface, NULL);
+
+        usb_put_dev(gdev->udev);
+
+        kfree(gdev);
+
+        dev_info(&interface->dev, "USB GoTemp now disconnected\\n");
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Make a sysfs file
+
+%font "typewriter", size 3.5
+static ssize_t show_temp(struct device *dev,
+                         struct device_attribute *attr,
+                         char *buf)
+{
+        struct usb_interface *intf = to_usb_interface(dev);
+        struct gotemp *gdev = usb_get_intfdata(intf);
+
+        return sprintf(buf, "%d\\n", gdev->temp);
+}
+static DEVICE_ATTR(temp, S_IRUGO, show_temp, NULL);
+%font "standard"
+
+	In 
+%cont, font "typewriter", size 4
+gotemp_probe:
+%font "typewriter", size 3.5
+        device_create_file(&interface->dev, &dev_attr_temp);
+
+%font "standard"
+	In 
+%cont, font "typewriter", size 4
+gotemp_disconnect:
+%font "typewriter", size 3.5
+        device_remove_file(&interface->dev, &dev_attr_temp);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Simple USB data transfer
+
+%font "typewriter", size 3
+\#define CMD_ID_START_MEASUREMENTS 0x18
+\#define CMD_ID_INIT               0x1A
+
+struct output_packet {
+        u8 cmd;
+        u8 params[7];
+} __attribute__((packed));
+
+static int send_cmd(struct gotemp *gdev, u8 cmd)
+{
+        struct output_packet *pkt;
+        int retval;
+
+        pkt = kzalloc(sizeof(*pkt), GFP_KERNEL);
+        if (!pkt)
+                return -ENOMEM;
+        pkt->cmd = cmd;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Simple USB data transfer
+
+%font "typewriter", size 3
+%fore "red"
+send_cmd() continued:
+%fore "black"
+        retval = usb_control_msg(gdev->udev,
+                                 usb_sndctrlpipe(gdev->udev, 0),
+                                 0x09,    /* bRequest = SET_REPORT */
+                                 0x21,    /* bRequestType = 00100001 */
+                                 0x0200,  /* or is it 0x0002? */
+                                 0x0000,  /* interface 0 */
+                                 pkt, sizeof(*pkt), 10000);
+        if (retval == sizeof(*pkt))
+                retval = 0;
+        kfree(pkt);
+        return retval;
+}
+
+static void init_dev(struct gotemp *gdev)
+{
+        /* First send an init message */
+        send_cmd(gdev, CMD_ID_INIT);
+
+        /* Start sending measurements */
+        send_cmd(gdev, CMD_ID_START_MEASUREMENTS);
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+"Real" USB data transfers
+
+%font "typewriter", size 7, center
+struct urb;
+%font "standard", leftfill
+
+	dynamically created
+
+	fire and forget
+
+	high data rates
+
+	Like network skb packets
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+urb in the device structure
+
+
+
+
+%font "typewriter", size 4
+struct gotemp {
+        struct usb_device *udev;
+        int temp;
+        unsigned char *int_in_buffer;
+        struct urb *int_in_urb;
+};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Find the endpoint
+
+
+
+%font "typewriter", size 3
+%fore "red"
+gotemp_probe():
+%fore "black"
+
+        /* find the one control endpoint of this device */
+        endpoint = &interface->cur_altsetting->endpoint[0].desc;
+
+        buffer_size = le16_to_cpu(endpoint->wMaxPacketSize);
+
+        gdev->int_in_buffer = kmalloc(buffer_size, GFP_KERNEL);
+        if (!gdev->int_in_buffer) {
+                dev_err(&interface->dev,
+                        "Could not allocate buffer\\n");
+                goto error;
+        }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Create the urb
+
+
+
+%font "typewriter", size 3
+%fore "red"
+gotemp_probe():
+%fore "black"
+
+        gdev->int_in_urb = usb_alloc_urb(0, GFP_KERNEL);
+        if (!gdev->int_in_urb) {
+                dev_err(&interface->dev, "No free urbs available\\n");
+                goto error;
+        }
+        usb_fill_int_urb(gdev->int_in_urb, udev,
+                         usb_rcvintpipe(udev,
+                                        endpoint->bEndpointAddress),
+                         gdev->int_in_buffer, buffer_size,
+                         read_int_callback, gdev,
+                         endpoint->bInterval);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+Submit the urb
+
+
+
+%font "typewriter", size 3
+%fore "red"
+init_dev():
+%fore "black"
+
+        /* kick off interrupt urb */
+        retval = usb_submit_urb(gdev->int_in_urb, GFP_KERNEL);
+        if (retval)
+                dev_err(&gdev->udev->dev, 
+                        "Error %d submitting interrupt urb\\n",
+                        retval);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+The data from the device
+
+
+%font "typewriter", size 4
+
+struct measurement_packet {
+        u8    measurements_in_packet;
+        u8    rolling_counter;
+        le16  measurement0;
+        le16  measurement1;
+        le16  measurement2;
+} __attribute__((packed));
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+The urb callback
+
+
+%font "typewriter", size 3
+static void read_int_callback(struct urb *urb, struct pt_regs *regs)
+{
+        struct gotemp *gdev = urb->context;
+        struct measurement_packet *measurement = urb->transfer_buffer;
+        int retval;
+
+        switch (urb->status) {
+        case 0: break;
+        case -ECONNRESET:
+        case -ENOENT:
+        case -ESHUTDOWN:
+                /* this urb is terminated, clean up */
+                dbg("urb shutting down with status: %d",
+                    urb->status);
+                return;
+        default:
+                dbg("nonzero urb status received: %d",
+                    __FUNCTION__, urb->status);
+                goto exit;
+        }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+
+The urb callback
+
+
+%font "typewriter", size 3
+%fore "red"
+read_int_callback() continued:
+%fore "black"
+
+        gdev->temp = le16_to_cpu(measurement->measurement0);
+
+exit:
+        retval = usb_submit_urb(urb, GFP_ATOMIC);
+        if (retval)
+                dev_err(&urb->dev->dev,
+                        "Error %d submitting interrupt urb\\n",
+                        retval);
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%page
+%nodefault
+%fore "black", back "white", center
+
+
+
+%size 20, font "knife"
+The End
+%font "standard"

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+
+find_device() {
+	TEMP_FILE=""
+	for file in /sys/bus/usb/drivers/gotemp/*-*; do
+		TEMP_FILE=$file/temp
+	done
+
+	if [ "x$TEMP_FILE" = "x" ]; then
+		echo "Can't find goTemp device"
+		exit
+	fi
+}
+
+find_device
+
+while `/bin\/true`
+do
+	TEMP=`cat $TEMP_FILE 2>/dev/null`
+	if [ $? -ne 0 ]; then
+		find_device
+	fi
+	TEMP_C=`echo "($TEMP * 0.0078125)" | bc -l`
+	TEMP_F=`echo "(($TEMP * 0.0078125) * (9/5)) + 32 " | bc -l`
+	echo "Temperature = $TEMP_F F                $TEMP_C C"
+	sleep 1s
+done
+
