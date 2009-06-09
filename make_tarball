@@ -1,0 +1,19 @@
+#!/bin/bash
+
+cd src
+cd final
+make clean
+cd ../step-1 && make clean
+cd ../step-2 && make clean
+cd ../step-3 && make clean
+cd ../step-4 && make clean
+cd ../step-5 && make clean
+cd ../step-6 && make clean
+
+cd ..
+cd ..
+mkdir usb_tutorial
+rsync -av src/ usb_tutorial
+tar -c usb_tutorial/ | gzip -9v > usb_tutorial.tar.gz
+rm -rf usb_tutorial
+
