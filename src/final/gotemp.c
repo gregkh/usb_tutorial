@@ -32,7 +32,7 @@ MODULE_DEVICE_TABLE(usb, id_table);
 
 struct gotemp {
 	struct usb_device *udev;
-	int temp;
+	int temperature;
 	unsigned char *int_in_buffer;
 	__u8 int_in_endpointAddr;
 	struct urb *int_in_urb;
@@ -123,10 +123,10 @@ static ssize_t show_temp(struct device *dev, struct device_attribute *attr,
 	struct usb_interface *intf = to_usb_interface(dev);
 	struct gotemp *gdev = usb_get_intfdata(intf);
 
-	return sprintf(buf, "%d\n", gdev->temp);
+	return sprintf(buf, "%d\n", gdev->temperature);
 }
 
-static DEVICE_ATTR(temp, S_IRUGO, show_temp, NULL);
+static DEVICE_ATTR(temperature, S_IRUGO, show_temp, NULL);
 
 static void read_int_callback(struct urb *urb)
 {
@@ -158,10 +158,10 @@ static void read_int_callback(struct urb *urb)
 		printk("%02x ", data[i]);
 	printk("\n");
 
-	dev_dbg(&urb->dev->dev, "counter %d, temp=%d\n",
+	dev_dbg(&urb->dev->dev, "counter %d, temperature=%d\n",
 		 measurement->rolling_counter,
 		 measurement->measurement0);
-	gdev->temp = le16_to_cpu(measurement->measurement0);
+	gdev->temperature = le16_to_cpu(measurement->measurement0);
 
 exit:
 	retval = usb_submit_urb(urb, GFP_ATOMIC);
@@ -234,7 +234,7 @@ static int gotemp_probe(struct usb_interface *interface,
 	 * if we delayed any initialization until after this, the user
 	 * would read garbage
 	 */
-	retval = device_create_file(&interface->dev, &dev_attr_temp);
+	retval = device_create_file(&interface->dev, &dev_attr_temperature);
 	if (retval)
 		goto error;
 
@@ -257,7 +257,7 @@ static void gotemp_disconnect(struct usb_interface *interface)
 
 	gdev = usb_get_intfdata(interface);
 
-	device_remove_file(&interface->dev, &dev_attr_temp);
+	device_remove_file(&interface->dev, &dev_attr_temperature);
 	/* intfdata must remain valid while reads are under way */
 	usb_set_intfdata(interface, NULL);
 

@@ -4,7 +4,7 @@
 find_device() {
 	TEMP_FILE=""
 	for file in /sys/bus/usb/drivers/gotemp/*-*; do
-		TEMP_FILE=$file/temp
+		TEMP_FILE=$file/temperature
 	done
 
 	if [ "x$TEMP_FILE" = "x" ]; then
