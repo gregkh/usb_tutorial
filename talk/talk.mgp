@@ -306,30 +306,30 @@ static void gotemp_disconnect(struct usb_interface *interface)
 Make a sysfs file
 
 %font "typewriter", size 3.5
-static ssize_t show_temperature(struct device *dev,
-                                struct device_attribute *attr,
-                                char *buf)
+static ssize_t show_temp(struct device *dev,
+                         struct device_attribute *attr,
+                         char *buf)
 {
         struct usb_interface *intf = to_usb_interface(dev);
         struct gotemp *gdev = usb_get_intfdata(intf);
 
         return sprintf(buf, "%d\\n", gdev->temperature);
 }
-static DEVICE_ATTR(temperature, S_IRUGO, show_temperature, NULL);
+static DEVICE_ATTR(temperature, S_IRUGO, show_temp, NULL);
 %font "standard"
 
 	In 
 %cont, font "typewriter", size 4
 gotemp_probe:
 %font "typewriter", size 3.5
-        device_create_file(&interface->dev, &dev_attr_temperature);
+        device_create_file(&intf->dev, &dev_attr_temperature);
 
 %font "standard"
 	In 
 %cont, font "typewriter", size 4
 gotemp_disconnect:
 %font "typewriter", size 3.5
-        device_remove_file(&interface->dev, &dev_attr_temperature);
+        device_remove_file(&intf->dev, &dev_attr_temperature);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %page
