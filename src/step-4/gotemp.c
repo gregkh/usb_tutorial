@@ -15,18 +15,18 @@ MODULE_DEVICE_TABLE(usb, id_table);
 
 struct gotemp {
 	struct usb_device *udev;
-	int temp;
+	int temperature;
 };
 
-static ssize_t show_temp(struct device *dev, struct device_attribute *attr,
-			 char *buf)
+static ssize_t show_temperature(struct device *dev,
+				struct device_attribute *attr, char *buf)
 {
 	struct usb_interface *intf = to_usb_interface(dev);
 	struct gotemp *gdev = usb_get_intfdata(intf);
 
-	return sprintf(buf, "%d\n", gdev->temp);
+	return sprintf(buf, "%d\n", gdev->temperature);
 }
-static DEVICE_ATTR(temp, S_IRUGO, show_temp, NULL);
+static DEVICE_ATTR(temperature, S_IRUGO, show_temperature, NULL);
 
 static int gotemp_probe(struct usb_interface *interface,
 			const struct usb_device_id *id)
@@ -45,8 +45,8 @@ static int gotemp_probe(struct usb_interface *interface,
 
 	usb_set_intfdata(interface, gdev);
 
-	gdev->temp = 42;
-	retval = device_create_file(&interface->dev, &dev_attr_temp);
+	gdev->temperature = 42;
+	retval = device_create_file(&interface->dev, &dev_attr_temperature);
 	if (retval)
 		goto error;
 
@@ -66,7 +66,7 @@ static void gotemp_disconnect(struct usb_interface *interface)
 	gdev = usb_get_intfdata(interface);
 	usb_set_intfdata(interface, NULL);
 
-	device_remove_file(&interface->dev, &dev_attr_temp);
+	device_remove_file(&interface->dev, &dev_attr_temperature);
 
 	usb_put_dev(gdev->udev);
 
