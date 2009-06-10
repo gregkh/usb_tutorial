@@ -42,12 +42,13 @@ Write a real
 Linux driver
 %font "standard"
 %size 6
-
 Greg Kroah-Hartman
 %size 5
 SuSE Labs / Novell
 %size 4
 %font "email"
+http://www.kroah.com/usb.tar.gz
+
 gregkh@suse.de
 greg@kroah.com
 %font "standard"
