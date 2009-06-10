@@ -248,7 +248,7 @@ Device specific structure
 %font "typewriter", size 5
 struct gotemp {
         struct usb_device *udev;
-        int temp;
+        int temperature;
 };
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -305,30 +305,30 @@ static void gotemp_disconnect(struct usb_interface *interface)
 Make a sysfs file
 
 %font "typewriter", size 3.5
-static ssize_t show_temp(struct device *dev,
-                         struct device_attribute *attr,
-                         char *buf)
+static ssize_t show_temperature(struct device *dev,
+                                struct device_attribute *attr,
+                                char *buf)
 {
         struct usb_interface *intf = to_usb_interface(dev);
         struct gotemp *gdev = usb_get_intfdata(intf);
 
-        return sprintf(buf, "%d\\n", gdev->temp);
+        return sprintf(buf, "%d\\n", gdev->temperature);
 }
-static DEVICE_ATTR(temp, S_IRUGO, show_temp, NULL);
+static DEVICE_ATTR(temperature, S_IRUGO, show_temperature, NULL);
 %font "standard"
 
 	In 
 %cont, font "typewriter", size 4
 gotemp_probe:
 %font "typewriter", size 3.5
-        device_create_file(&interface->dev, &dev_attr_temp);
+        device_create_file(&interface->dev, &dev_attr_temperature);
 
 %font "standard"
 	In 
 %cont, font "typewriter", size 4
 gotemp_disconnect:
 %font "typewriter", size 3.5
-        device_remove_file(&interface->dev, &dev_attr_temp);
+        device_remove_file(&interface->dev, &dev_attr_temperature);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %page
@@ -412,7 +412,7 @@ urb in the device structure
 %font "typewriter", size 4
 struct gotemp {
         struct usb_device *udev;
-        int temp;
+        int temperature;
         unsigned char *int_in_buffer;
         struct urb *int_in_urb;
 };
@@ -481,7 +481,7 @@ init_dev():
         /* kick off interrupt urb */
         retval = usb_submit_urb(gdev->int_in_urb, GFP_KERNEL);
         if (retval)
-                dev_err(&gdev->udev->dev, 
+                dev_err(&gdev->udev->dev,
                         "Error %d submitting interrupt urb\\n",
                         retval);
 
@@ -541,7 +541,7 @@ The urb callback
 read_int_callback() continued:
 %fore "black"
 
-        gdev->temp = le16_to_cpu(measurement->measurement0);
+        gdev->temperature = le16_to_cpu(measurement->measurement0);
 
 exit:
         retval = usb_submit_urb(urb, GFP_ATOMIC);
