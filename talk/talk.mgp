@@ -510,7 +510,7 @@ The urb callback
 
 
 %font "typewriter", size 3
-static void read_int_callback(struct urb *urb, struct pt_regs *regs)
+static void read_int_callback(struct urb *urb)
 {
         struct gotemp *gdev = urb->context;
         struct measurement_packet *measurement = urb->transfer_buffer;
