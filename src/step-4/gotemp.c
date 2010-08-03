@@ -2,6 +2,7 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/usb.h>
+#include <linux/slab.h>
 
 #define VENDOR_ID	0x08f7
 #define PRODUCT_ID	0x0002
