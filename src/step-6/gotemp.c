@@ -135,7 +135,7 @@ static int gotemp_probe(struct usb_interface *interface,
 	int retval = -ENOMEM;
 	size_t buffer_size;
 
-	gdev = kzalloc(sizeof(struct gotemp), GFP_KERNEL);
+	gdev = kzalloc(sizeof(*gdev), GFP_KERNEL);
 	if (gdev == NULL) {
 		dev_err(&interface->dev, "Out of memory\n");
 		return -ENOMEM;
